@@ -32,7 +32,10 @@ const char PORTAL_HTML[] PROGMEM = R"rawliteral(
     color: var(--dark);
     min-height: 100vh;
     font-size: 14px;
+    display: flex;
+    flex-direction: column;
   }
+  main { flex: 1; }
 
   /* Header */
   header { background: var(--white); border-bottom: 1px solid var(--border); position: sticky; top: 0; z-index: 100; }
@@ -193,8 +196,8 @@ const char PORTAL_HTML[] PROGMEM = R"rawliteral(
   @keyframes spin { to { transform: rotate(360deg); } }
 
   /* Footer */
-  footer { border-top: 1px solid var(--border); background: var(--white); }
-  .footer-inner { max-width: 680px; margin: 0 auto; padding: 12px 20px; display: flex; align-items: center; justify-content: space-between; font-size: 11px; color: var(--light); }
+  footer { border-top: 1px solid var(--border); background: var(--white); margin-top: auto; }
+  .footer-inner { max-width: 680px; margin: 0 auto; padding: 12px 20px; text-align: center; font-size: 11px; color: var(--light); }
 </style>
 </head>
 <body>
@@ -498,8 +501,7 @@ const char PORTAL_HTML[] PROGMEM = R"rawliteral(
 
 <footer>
   <div class="footer-inner">
-    <span>© 2025 Sensornode IoT</span>
-    <span>192.168.4.1</span>
+    Sensornode &copy; 2025 - All rights reserved
   </div>
 </footer>
 
