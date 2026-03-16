@@ -127,9 +127,9 @@ const char PORTAL_HTML[] PROGMEM = R"rawliteral(
   .btn-reboot:hover { background: #B45309; }
 
   /* Forms */
-  .form-body { padding: 0; }
-  .form-group { padding: 14px 20px; border-bottom: 1px solid var(--border); margin-bottom: 0; }
-  .form-group:last-child { border-bottom: none; }
+  .grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 14px; }
+  .form-group { margin-bottom: 16px; }
+  .form-group:last-child { margin-bottom: 0; }
   .label { display: block; font-size: 12px; font-weight: 600; color: var(--mid); margin-bottom: 5px; }
   .label .req { color: var(--red); margin-left: 2px; }
   .hint { font-size: 11px; color: var(--light); margin-top: 4px; }
@@ -198,32 +198,6 @@ const char PORTAL_HTML[] PROGMEM = R"rawliteral(
   /* Footer */
   footer { border-top: 1px solid var(--border); background: var(--white); margin-top: auto; }
   .footer-inner { max-width: 680px; margin: 0 auto; padding: 12px 20px; text-align: center; font-size: 11px; color: var(--light); }
-
-  /* Responsive */
-  @media (max-width: 520px) {
-    .card-footer { flex-wrap: wrap; }
-    .card-footer .btn { flex: 1; min-width: 100px; justify-content: center; }
-    .card-footer .btn[style*="margin-left:auto"] { margin-left: 0 !important; }
-    .reboot-card .card-body { flex-direction: column; text-align: center; }
-    .reboot-content { text-align: center; }
-    .btn-reboot { width: 100%; justify-content: center; }
-    .info-row { flex-direction: column; align-items: flex-start; gap: 4px; }
-    .info-row .v { text-align: left; max-width: 100%; }
-    .hero { padding: 16px 18px; }
-    .page-title h1 { font-size: 17px; }
-    main { padding: 20px 16px 40px; }
-    .card-body { padding: 16px; }
-    .form-body { padding: 0; }
-    .form-group { padding: 12px 16px; }
-    .card-header, .card-footer { padding: 12px 16px; }
-  }
-
-  @media (max-width: 380px) {
-    .brand-row { flex-direction: column; gap: 8px; align-items: flex-start; }
-    .tab { font-size: 11px; padding: 9px 4px; }
-    .step-num { width: 14px; height: 14px; font-size: 8px; }
-    .upload-zone { padding: 24px 16px; }
-  }
 </style>
 </head>
 <body>
@@ -380,21 +354,23 @@ const char PORTAL_HTML[] PROGMEM = R"rawliteral(
     <div class="status-msg" id="wifi-status"></div>
     <div class="card">
       <div class="card-header"><div class="card-title">Network Credentials</div></div>
-      <div class="card-body form-body">
-        <div class="form-group">
-          <label class="label">WiFi SSID <span class="req">*</span></label>
-          <input type="text" id="wifi-ssid" placeholder="e.g. MyNetwork_5G" maxlength="32">
-          <div class="field-error" id="err-wifi-ssid">WiFi SSID is required</div>
-        </div>
-        <div class="form-group">
-          <label class="label">WiFi Password <span class="req">*</span></label>
-          <div class="input-wrap">
-            <input type="password" id="wifi-pass" placeholder="Enter password" maxlength="64">
-            <button type="button" class="toggle-pw" onclick="togglePw('wifi-pass')">
-              <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
-            </button>
+      <div class="card-body">
+        <div class="grid">
+          <div class="form-group">
+            <label class="label">WiFi SSID <span class="req">*</span></label>
+            <input type="text" id="wifi-ssid" placeholder="e.g. MyNetwork_5G" maxlength="32">
+            <div class="field-error" id="err-wifi-ssid">WiFi SSID is required</div>
           </div>
-          <div class="field-error" id="err-wifi-pass">Password is required</div>
+          <div class="form-group">
+            <label class="label">WiFi Password <span class="req">*</span></label>
+            <div class="input-wrap">
+              <input type="password" id="wifi-pass" placeholder="Enter password" maxlength="64">
+              <button type="button" class="toggle-pw" onclick="togglePw('wifi-pass')">
+                <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
+              </button>
+            </div>
+            <div class="field-error" id="err-wifi-pass">Password is required</div>
+          </div>
         </div>
       </div>
       <div class="card-footer">
@@ -416,51 +392,53 @@ const char PORTAL_HTML[] PROGMEM = R"rawliteral(
     <div class="status-msg" id="mqtt-status"></div>
     <div class="card">
       <div class="card-header"><div class="card-title">Broker & Identity</div></div>
-      <div class="card-body form-body">
-        <div class="form-group">
-          <label class="label">MQTT Host <span class="req">*</span></label>
-          <input type="text" id="mqtt-host" placeholder="mqtt.sensornodeiot.com" maxlength="64">
-          <div class="field-error" id="err-mqtt-host">MQTT Host is required</div>
-        </div>
-        <div class="form-group">
-          <label class="label">MQTT Port <span class="req">*</span></label>
-          <input type="number" id="mqtt-port" value="1883">
-          <div class="field-error" id="err-mqtt-port">Port is required</div>
-        </div>
-        <div class="form-group">
-          <label class="label">Tenant ID <span class="req">*</span></label>
-          <input type="text" id="mqtt-tenant" placeholder="e.g. dc1b368b-fde3-4559-..." maxlength="64">
-          <div class="field-error" id="err-mqtt-tenant">Tenant ID is required</div>
-        </div>
-        <div class="form-group">
-          <label class="label">Application ID <span class="req">*</span></label>
-          <input type="text" id="mqtt-app" placeholder="e.g. sensornode-uat" maxlength="64">
-          <div class="field-error" id="err-mqtt-app">Application ID is required</div>
-        </div>
-        <div class="form-group">
-          <label class="label">Device ID (Client ID) <span class="req">*</span></label>
-          <input type="text" id="mqtt-client" placeholder="e.g. d0ed1dac-8a2e-4744-..." maxlength="64">
-          <div class="field-error" id="err-mqtt-client">Device ID is required</div>
-        </div>
-        <div class="form-group">
-          <label class="label">Device Token (Username) <span class="req">*</span></label>
-          <div class="input-wrap">
-            <input type="password" id="mqtt-user" placeholder="Device token" maxlength="64">
-            <button type="button" class="toggle-pw" onclick="togglePw('mqtt-user')">
-              <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
-            </button>
+      <div class="card-body">
+        <div class="grid">
+          <div class="form-group">
+            <label class="label">MQTT Host <span class="req">*</span></label>
+            <input type="text" id="mqtt-host" placeholder="mqtt.sensornodeiot.com" maxlength="64">
+            <div class="field-error" id="err-mqtt-host">MQTT Host is required</div>
           </div>
-          <div class="field-error" id="err-mqtt-user">Device Token is required</div>
-        </div>
-        <div class="form-group">
-          <label class="label">Device Password <span class="req">*</span></label>
-          <div class="input-wrap">
-            <input type="password" id="mqtt-pass" placeholder="Device password" maxlength="64">
-            <button type="button" class="toggle-pw" onclick="togglePw('mqtt-pass')">
-              <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
-            </button>
+          <div class="form-group">
+            <label class="label">MQTT Port <span class="req">*</span></label>
+            <input type="number" id="mqtt-port" value="1883">
+            <div class="field-error" id="err-mqtt-port">Port is required</div>
           </div>
-          <div class="field-error" id="err-mqtt-pass">Device Password is required</div>
+          <div class="form-group">
+            <label class="label">Tenant ID <span class="req">*</span></label>
+            <input type="text" id="mqtt-tenant" placeholder="e.g. dc1b368b-fde3-4559-..." maxlength="64">
+            <div class="field-error" id="err-mqtt-tenant">Tenant ID is required</div>
+          </div>
+          <div class="form-group">
+            <label class="label">Application ID <span class="req">*</span></label>
+            <input type="text" id="mqtt-app" placeholder="e.g. sensornode-uat" maxlength="64">
+            <div class="field-error" id="err-mqtt-app">Application ID is required</div>
+          </div>
+          <div class="form-group">
+            <label class="label">Device ID (Client ID) <span class="req">*</span></label>
+            <input type="text" id="mqtt-client" placeholder="e.g. d0ed1dac-8a2e-4744-..." maxlength="64">
+            <div class="field-error" id="err-mqtt-client">Device ID is required</div>
+          </div>
+          <div class="form-group">
+            <label class="label">Device Token (Username) <span class="req">*</span></label>
+            <div class="input-wrap">
+              <input type="password" id="mqtt-user" placeholder="Device token" maxlength="64">
+              <button type="button" class="toggle-pw" onclick="togglePw('mqtt-user')">
+                <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
+              </button>
+            </div>
+            <div class="field-error" id="err-mqtt-user">Device Token is required</div>
+          </div>
+          <div class="form-group">
+            <label class="label">Device Password <span class="req">*</span></label>
+            <div class="input-wrap">
+              <input type="password" id="mqtt-pass" placeholder="Device password" maxlength="64">
+              <button type="button" class="toggle-pw" onclick="togglePw('mqtt-pass')">
+                <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
+              </button>
+            </div>
+            <div class="field-error" id="err-mqtt-pass">Device Password is required</div>
+          </div>
         </div>
       </div>
       <div class="card-footer">
