@@ -32,6 +32,8 @@ const char PORTAL_HTML[] PROGMEM = R"rawliteral(
     color: var(--dark);
     min-height: 100vh;
     font-size: 14px;
+    display: flex;
+    flex-direction: column;
   }
 
   /* Header */
@@ -59,7 +61,7 @@ const char PORTAL_HTML[] PROGMEM = R"rawliteral(
   .step-progress-fill { height: 100%; background: linear-gradient(90deg, var(--blue), var(--blue-mid)); transition: width 0.35s ease; width: 0%; }
 
   /* Main */
-  main { max-width: 680px; margin: 0 auto; padding: 28px 20px 56px; }
+  main { max-width: 680px; margin: 0 auto; padding: 28px 20px 56px; flex: 1; width: 100%; }
   .page { display: none; }
   .page.active { display: block; }
   .page-title { margin-bottom: 20px; }
@@ -202,7 +204,7 @@ const char PORTAL_HTML[] PROGMEM = R"rawliteral(
 <header>
   <div class="header-inner">
     <div class="brand-row" style="justify-content:center;border-bottom:none;padding:14px 0;">
-      <span style="font-size:16px;font-weight:700;color:var(--dark);">Device Configuration</span>
+      <span style="font-size:16px;font-weight:700;color:var(--dark);">Device Configuration | Connecting with Sensorclouds</span>
     </div>
     <nav class="nav-tabs">
       <div class="tab active" id="tab-status" onclick="goToPage('status')"><span class="step-num">1</span>Status</div>
@@ -479,8 +481,7 @@ const char PORTAL_HTML[] PROGMEM = R"rawliteral(
 
 <footer>
   <div class="footer-inner">
-    <span> Sensorclouds by Sensorndoe © 2026 - All rights reserved</span>
-    <span>192.168.4.1</span>
+    <span> Sensorclouds by Sensornode © 2026 - All rights reserved</span>
   </div>
 </footer>
 
