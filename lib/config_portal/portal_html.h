@@ -201,27 +201,8 @@ const char PORTAL_HTML[] PROGMEM = R"rawliteral(
 
 <header>
   <div class="header-inner">
-    <div class="brand-row">
-      <a class="sn-logo" href="#">
-        <svg width="32" height="32" viewBox="0 0 32 32" fill="none">
-          <rect width="32" height="32" rx="8" fill="#0047FF"/>
-          <path d="M10 13C10 13 12.2 10 16 10C19.8 10 22 13 22 13" stroke="white" stroke-width="1.8" stroke-linecap="round"/>
-          <path d="M7.5 10.5C7.5 10.5 11 6 16 6C21 6 24.5 10.5 24.5 10.5" stroke="white" stroke-width="1.8" stroke-linecap="round" opacity="0.5"/>
-          <circle cx="16" cy="13.5" r="1.8" fill="white"/>
-          <line x1="16" y1="15.3" x2="16" y2="24" stroke="white" stroke-width="1.8" stroke-linecap="round"/>
-          <line x1="16" y1="24" x2="11.5" y2="27" stroke="white" stroke-width="1.8" stroke-linecap="round"/>
-          <line x1="16" y1="24" x2="20.5" y2="27" stroke="white" stroke-width="1.8" stroke-linecap="round"/>
-          <line x1="13" y1="22.5" x2="19" y2="22.5" stroke="white" stroke-width="1.4" stroke-linecap="round"/>
-        </svg>
-        <div class="sn-wordmark">
-          <span class="name">sensornode</span>
-          <span class="sub">IoT Technology</span>
-        </div>
-      </a>
-      <div class="device-badge">
-        <span class="dot" id="status-dot"></span>
-        <span id="status-label">ESP32 · Loading...</span>
-      </div>
+    <div class="brand-row" style="justify-content:center;border-bottom:none;padding:14px 0;">
+      <span style="font-size:16px;font-weight:700;color:var(--dark);">Device Configuration</span>
     </div>
     <nav class="nav-tabs">
       <div class="tab active" id="tab-status" onclick="goToPage('status')"><span class="step-num">1</span>Status</div>
@@ -498,7 +479,7 @@ const char PORTAL_HTML[] PROGMEM = R"rawliteral(
 
 <footer>
   <div class="footer-inner">
-    <span>© 2025 Sensornode IoT</span>
+    <span> Sensorclouds by Sensorndoe © 2026 - All rights reserved</span>
     <span>192.168.4.1</span>
   </div>
 </footer>
