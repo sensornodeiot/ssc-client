@@ -19,9 +19,30 @@ uint32_t lastPublish = 0;
 
 bool shouldEnterPortal()
 {
+    const uint32_t holdDurationMs = 2000;
+    const uint32_t checkIntervalMs = 100;
+
     pinMode(OTA_TRIGGER_PIN, INPUT_PULLUP);
     delay(50);
-    return digitalRead(OTA_TRIGGER_PIN) == LOW;
+
+    if (digitalRead(OTA_TRIGGER_PIN) != LOW) {
+        return false;
+    }
+
+    Serial.print("[Main] BOOT button pressed, hold for 2s to enter config portal");
+    uint32_t startTime = millis();
+
+    while (millis() - startTime < holdDurationMs) {
+        if (digitalRead(OTA_TRIGGER_PIN) != LOW) {
+            Serial.println(" - released, skipping portal");
+            return false;
+        }
+        Serial.print(".");
+        delay(checkIntervalMs);
+    }
+
+    Serial.println(" OK");
+    return true;
 }
 
 void setup()
