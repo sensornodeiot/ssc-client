@@ -198,6 +198,31 @@ const char PORTAL_HTML[] PROGMEM = R"rawliteral(
   /* Footer */
   footer { border-top: 1px solid var(--border); background: var(--white); margin-top: auto; }
   .footer-inner { max-width: 680px; margin: 0 auto; padding: 12px 20px; text-align: center; font-size: 11px; color: var(--light); }
+
+  /* Responsive */
+  @media (max-width: 520px) {
+    .grid { grid-template-columns: 1fr; }
+    .card-footer { flex-wrap: wrap; }
+    .card-footer .btn { flex: 1; min-width: 100px; justify-content: center; }
+    .card-footer .btn[style*="margin-left:auto"] { margin-left: 0 !important; }
+    .reboot-card .card-body { flex-direction: column; text-align: center; }
+    .reboot-content { text-align: center; }
+    .btn-reboot { width: 100%; justify-content: center; }
+    .info-row { flex-direction: column; align-items: flex-start; gap: 4px; }
+    .info-row .v { text-align: left; max-width: 100%; }
+    .hero { padding: 16px 18px; }
+    .page-title h1 { font-size: 17px; }
+    main { padding: 20px 16px 40px; }
+    .card-body { padding: 16px; }
+    .card-header, .card-footer { padding: 12px 16px; }
+  }
+
+  @media (max-width: 380px) {
+    .brand-row { flex-direction: column; gap: 8px; align-items: flex-start; }
+    .tab { font-size: 11px; padding: 9px 4px; }
+    .step-num { width: 14px; height: 14px; font-size: 8px; }
+    .upload-zone { padding: 24px 16px; }
+  }
 </style>
 </head>
 <body>
