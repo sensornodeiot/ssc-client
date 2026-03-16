@@ -74,10 +74,9 @@ const char PORTAL_HTML[] PROGMEM = R"rawliteral(
   .hero { background: linear-gradient(135deg, var(--blue) 0%, #1469FF 55%, var(--blue-mid) 100%); border-radius: var(--radius); padding: 18px 22px; color: #fff; margin-bottom: 14px; position: relative; overflow: hidden; }
   .hero.ready { background: linear-gradient(135deg, var(--green) 0%, #059669 100%); }
   .hero::after { content: ''; position: absolute; right: -18px; top: -18px; width: 110px; height: 110px; border-radius: 50%; background: rgba(255,255,255,0.06); }
-  .hero h2 { font-size: 15px; font-weight: 700; position: relative; display: flex; align-items: center; gap: 8px; }
-  .hero p { font-size: 12px; opacity: .85; margin-top: 4px; position: relative; }
-  .hero .btn { margin-top: 12px; background: rgba(255,255,255,0.2); border: 1px solid rgba(255,255,255,0.3); }
-  .hero .btn:hover { background: rgba(255,255,255,0.3); }
+  .hero .btn { margin-top: 12px; background: var(--white); color: #0047FF; border: none; }
+  .hero .btn:hover { background: #F0F4FF; }
+  .hero p { font-size: 12px; color: rgba(255,255,255,0.8); margin-top: 10px; }
 
   /* Cards */
   .card { background: var(--white); border: 1px solid var(--border); border-radius: var(--radius); box-shadow: var(--shadow); }
@@ -132,10 +131,6 @@ const char PORTAL_HTML[] PROGMEM = R"rawliteral(
   .label { display: block; font-size: 12px; font-weight: 600; color: var(--mid); margin-bottom: 5px; }
   .label .req { color: var(--red); margin-left: 2px; }
   .hint { font-size: 11px; color: var(--light); margin-top: 4px; }
-  .input-wrap { position: relative; }
-  .input-wrap input { padding-right: 38px; }
-  .toggle-pw { position: absolute; right: 10px; top: 50%; transform: translateY(-50%); background: none; border: none; cursor: pointer; color: var(--light); padding: 2px; display: flex; }
-  .toggle-pw:hover { color: var(--blue); }
   input[type=text], input[type=password], input[type=number] { width: 100%; padding: 9px 12px; border: 1px solid var(--border); border-radius: var(--radius-sm); font-size: 13px; color: var(--dark); background: var(--white); font-family: inherit; outline: none; transition: border-color 0.15s, box-shadow 0.15s; }
   input:focus { border-color: var(--blue); box-shadow: 0 0 0 3px rgba(0,71,255,0.10); }
   input::placeholder { color: var(--light); }
@@ -227,15 +222,11 @@ const char PORTAL_HTML[] PROGMEM = R"rawliteral(
     </div>
 
     <div class="hero" id="hero-banner">
-      <h2 id="hero-title">
-        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
-        <span id="hero-title-text">Loading...</span>
-      </h2>
-      <p id="hero-text">Please wait while we load the device settings.</p>
-      <button class="btn" id="hero-btn" onclick="goToPage('wifi')" style="display:none;">
+      <button class="btn" id="hero-btn" onclick="goToPage('wifi')">
         <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
         Start Configuration
       </button>
+      <p>Configure your device to connect with Sensorclouds</p>
     </div>
 
     <!-- Setup Checklist as clickable items -->
@@ -343,12 +334,7 @@ const char PORTAL_HTML[] PROGMEM = R"rawliteral(
           </div>
           <div class="form-group">
             <label class="label">WiFi Password <span class="req">*</span></label>
-            <div class="input-wrap">
-              <input type="password" id="wifi-pass" placeholder="Enter password" maxlength="64">
-              <button type="button" class="toggle-pw" onclick="togglePw('wifi-pass')">
-                <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
-              </button>
-            </div>
+            <input type="password" id="wifi-pass" placeholder="Enter password" maxlength="64">
             <div class="field-error" id="err-wifi-pass">Password is required</div>
           </div>
         </div>
@@ -401,22 +387,12 @@ const char PORTAL_HTML[] PROGMEM = R"rawliteral(
           </div>
           <div class="form-group">
             <label class="label">Device Token (Username) <span class="req">*</span></label>
-            <div class="input-wrap">
-              <input type="password" id="mqtt-user" placeholder="Device token" maxlength="64">
-              <button type="button" class="toggle-pw" onclick="togglePw('mqtt-user')">
-                <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
-              </button>
-            </div>
+            <input type="password" id="mqtt-user" placeholder="Device token" maxlength="64">
             <div class="field-error" id="err-mqtt-user">Device Token is required</div>
           </div>
           <div class="form-group">
             <label class="label">Device Password <span class="req">*</span></label>
-            <div class="input-wrap">
-              <input type="password" id="mqtt-pass" placeholder="Device password" maxlength="64">
-              <button type="button" class="toggle-pw" onclick="togglePw('mqtt-pass')">
-                <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
-              </button>
-            </div>
+            <input type="password" id="mqtt-pass" placeholder="Device password" maxlength="64">
             <div class="field-error" id="err-mqtt-pass">Device Password is required</div>
           </div>
         </div>
@@ -512,10 +488,7 @@ function loadConfig() {
   fetch('/api/config')
     .then(r => r.json())
     .then(data => { config = data; populateFields(); updateStatusPage(); })
-    .catch(e => {
-      document.getElementById('hero-title-text').textContent = 'Connection Error';
-      document.getElementById('hero-text').textContent = 'Unable to load device configuration.';
-    });
+    .catch(e => {});
 }
 
 function populateFields() {
@@ -563,23 +536,12 @@ function updateStatusPage() {
 
   // Update hero
   const hero = document.getElementById('hero-banner');
-  const heroTitle = document.getElementById('hero-title-text');
-  const heroText = document.getElementById('hero-text');
   const heroBtn = document.getElementById('hero-btn');
-  const heroIcon = document.getElementById('hero-title').querySelector('svg');
 
   if (isValid) {
     hero.className = 'hero ready';
-    heroTitle.textContent = 'Ready to Connect';
-    heroText.textContent = 'All settings configured. Restart the device to apply changes and connect to Sensorclouds.';
-    heroIcon.innerHTML = '<polyline points="20 6 9 17 4 12"/>';
-    heroBtn.style.display = 'none';
   } else {
     hero.className = 'hero';
-    heroTitle.textContent = 'Setup Required';
-    heroText.textContent = 'Complete the steps below to configure your device for Sensorclouds.';
-    heroIcon.innerHTML = '<circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/>';
-    heroBtn.style.display = 'inline-flex';
     heroBtn.onclick = function() { goToPage(hasWifi ? (hasMqtt ? 'mqtt' : 'mqtt') : 'wifi'); };
   }
 }
@@ -606,11 +568,6 @@ function goToPage(id) {
   document.getElementById('tab-' + id).classList.add('active');
   document.getElementById('step-bar').style.width = BAR[id];
   window.scrollTo({ top: 0, behavior: 'smooth' });
-}
-
-function togglePw(inputId) {
-  const inp = document.getElementById(inputId);
-  inp.type = inp.type === 'password' ? 'text' : 'password';
 }
 
 function showStatus(elemId, msg, isError) {

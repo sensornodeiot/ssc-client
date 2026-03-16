@@ -161,6 +161,32 @@ void ConfigPortal::handleReboot() {
     ESP.restart();
 }
 
+bool shouldEnterPortal(uint8_t pin, uint32_t holdDurationMs) {
+    const uint32_t checkIntervalMs = 100;
+
+    pinMode(pin, INPUT_PULLUP);
+    delay(50);
+
+    if (digitalRead(pin) != LOW) {
+        return false;
+    }
+
+    Serial.print("[Main] BOOT button pressed, hold for 2s to enter config portal");
+    uint32_t startTime = millis();
+
+    while (millis() - startTime < holdDurationMs) {
+        if (digitalRead(pin) != LOW) {
+            Serial.println(" - released, skipping portal");
+            return false;
+        }
+        Serial.print(".");
+        delay(checkIntervalMs);
+    }
+
+    Serial.println(" OK");
+    return true;
+}
+
 void startConfigPortal(ConfigStore& store, const char* apSsid, const char* apPassword) {
     ConfigPortal portal(store);
     portal.start(apSsid, apPassword);

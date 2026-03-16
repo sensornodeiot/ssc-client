@@ -26,5 +26,8 @@ private:
     Config config_;
 };
 
+// Check if BOOT button is held to trigger config portal
+bool shouldEnterPortal(uint8_t pin, uint32_t holdDurationMs = 2000);
+
 // Convenience function
 void startConfigPortal(ConfigStore& store, const char* apSsid, const char* apPassword);
