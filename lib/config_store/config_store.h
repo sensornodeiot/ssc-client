@@ -48,12 +48,25 @@ struct Config {
     }
 };
 
+struct OtaState {
+    char commandId[65];
+    char targetVersion[20];
+    uint8_t state;  // 0=idle, 1=pending_reboot, 2=pending_ack
+
+    bool isPending() const { return state != 0; }
+    void clear() { memset(this, 0, sizeof(OtaState)); }
+};
+
 class ConfigStore {
 public:
     bool begin();
     bool load(Config& config);
     bool save(const Config& config);
     bool clear();
+
+    bool saveOtaState(const OtaState& otaState);
+    bool loadOtaState(OtaState& otaState);
+    bool clearOtaState();
 
 private:
     static constexpr const char* NAMESPACE = "ssc";

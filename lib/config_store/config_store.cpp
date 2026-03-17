@@ -12,6 +12,9 @@ namespace {
     constexpr const char* KEY_TENANT_ID       = "tenant_id";
     constexpr const char* KEY_APP_ID          = "app_id";
     constexpr const char* KEY_PUBLISH_INTERVAL = "pub_int";
+    constexpr const char* KEY_OTA_CMD_ID      = "ota_cmd_id";
+    constexpr const char* KEY_OTA_TGT_VER     = "ota_tgt_ver";
+    constexpr const char* KEY_OTA_STATE       = "ota_state";
 }
 
 bool ConfigStore::begin() {
@@ -74,4 +77,42 @@ bool ConfigStore::clear() {
     bool ok = prefs.clear();
     prefs.end();
     return ok;
+}
+
+bool ConfigStore::saveOtaState(const OtaState& otaState) {
+    Preferences prefs;
+    if (!prefs.begin(NAMESPACE, false)) return false;
+
+    bool ok = true;
+    ok &= prefs.putString(KEY_OTA_CMD_ID, otaState.commandId) > 0;
+    ok &= prefs.putString(KEY_OTA_TGT_VER, otaState.targetVersion) > 0;
+    ok &= prefs.putUChar(KEY_OTA_STATE, otaState.state) > 0;
+
+    prefs.end();
+    return ok;
+}
+
+bool ConfigStore::loadOtaState(OtaState& otaState) {
+    otaState.clear();
+    Preferences prefs;
+    if (!prefs.begin(NAMESPACE, true)) return false;
+
+    prefs.getString(KEY_OTA_CMD_ID, otaState.commandId, sizeof(otaState.commandId));
+    prefs.getString(KEY_OTA_TGT_VER, otaState.targetVersion, sizeof(otaState.targetVersion));
+    otaState.state = prefs.getUChar(KEY_OTA_STATE, 0);
+
+    prefs.end();
+    return true;
+}
+
+bool ConfigStore::clearOtaState() {
+    Preferences prefs;
+    if (!prefs.begin(NAMESPACE, false)) return false;
+
+    prefs.remove(KEY_OTA_CMD_ID);
+    prefs.remove(KEY_OTA_TGT_VER);
+    prefs.remove(KEY_OTA_STATE);
+
+    prefs.end();
+    return true;
 }

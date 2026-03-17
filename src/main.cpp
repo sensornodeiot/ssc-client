@@ -5,6 +5,7 @@
 #include "config_portal.h"
 #include "wifi_manager.h"
 #include "ssc_client.h"
+#include "ota_handler.h"
 
 ConfigStore configStore;
 Config config;
@@ -12,6 +13,8 @@ Config config;
 WiFiClient wifiClient;
 WiFiManager wifiMgr;
 SSCClient sscClient(wifiClient);
+OtaHandler otaHandler;
+bool otaAckChecked = false;
 
 void setup()
 {
@@ -38,6 +41,12 @@ void setup()
     }
 
     Serial.println("[Main] Configuration loaded");
+    Serial.printf("[Main] Firmware version: %s\n", FIRMWARE_VERSION);
+
+    // Set MQTT command callback to route to OtaHandler
+    sscClient.setCommandCallback([](const char* topic, uint8_t* payload, unsigned int len) {
+        otaHandler.handleMessage(topic, payload, len);
+    });
 
     // Start WiFi
     wifiMgr.begin(config.wifi_ssid, config.wifi_pass);
@@ -52,6 +61,9 @@ void setup()
         .tenantId = config.tenant_id,
         .applicationId = config.application_id};
     sscClient.begin(sscConfig);
+
+    // Initialize OTA handler
+    otaHandler.begin(&sscClient.getMqttClient(), sscClient.getAckTopic(), &configStore);
 }
 
 void loop()
@@ -62,5 +74,17 @@ void loop()
     if (wifiMgr.isConnected())
     {
         sscClient.update();
+
+        // After first MQTT connect, check for pending OTA ACK
+        if (sscClient.isConnected() && !otaAckChecked)
+        {
+            otaHandler.checkPendingAck();
+            otaAckChecked = true;
+        }
+
+        // Drive OTA state machine
+        otaHandler.update();
     }
+
+    delay(1000);
 }

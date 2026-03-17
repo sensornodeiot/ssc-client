@@ -1,6 +1,6 @@
 # End-node guide connecting to Sensorclouds
 
-Sensorclouds-client bundle library for connecting end-node to the [Sensorclouds](https://ssc.sensornodeiot.com) IoT platform. Features a web config portal, WiFi management with auto reconnect, MQTT telemetry publishing, OTA firmware updates, and NVS-based persistent configuration.
+Sensorclouds-client bundle library for connecting end-nodes to the [Sensorclouds](https://ssc.sensornodeiot.com) IoT platform. Features a web config portal, WiFi management with auto reconnect, MQTT telemetry publishing, remote OTA firmware updates with rollback support, and NVS-based persistent configuration.
 
 ## Project Structure
 
@@ -13,6 +13,7 @@ esp32/
 │   ├── config_portal/            # Captive portal web UI (4-step wizard)
 │   ├── ssc_client/               # MQTT client for Sensorclouds platform
 │   ├── wifi_manager/             # Non-blocking WiFi state machine
+│   ├── ota_handler/              # Remote OTA update lifecycle
 │   └── sensor/                   # Abstract sensor interface
 ├── test/
 │   ├── test_config/              # Config struct validation (native)
@@ -42,11 +43,12 @@ pio run --target upload --target monitor      # Flash and monitor
 
 ### External Dependencies
 
-| Library                                                   | Version | Purpose           |
-| --------------------------------------------------------- | ------- | ----------------- |
-| [PubSubClient](https://github.com/knolleary/pubsubclient) | ^2.8    | MQTT 3.1.1 client |
+| Library                                                   | Version | Purpose                    |
+| --------------------------------------------------------- | ------- | -------------------------- |
+| [PubSubClient](https://github.com/knolleary/pubsubclient) | ^2.8    | MQTT 3.1.1 client          |
+| [ArduinoJson](https://github.com/bblanchon/ArduinoJson)   | ^7      | JSON parsing for OTA commands |
 
-All other libraries (WiFi, Preferences, WebServer, Update) are built into the ESP32 Arduino core.
+All other libraries (WiFi, WiFiClientSecure, HTTPClient, Preferences, WebServer, Update) are built into the ESP32 Arduino core.
 
 ## Configuration
 
@@ -97,6 +99,8 @@ Validation helpers: `hasWiFi()` (SSID non-empty), `hasMqtt()` (all MQTT fields n
 ```
 Telemetry:  tenant/{tenantId}/app/{applicationId}/device/{mqtt_username}/data
 Status:     tenant/{tenantId}/app/{applicationId}/device/{mqtt_username}/status
+Command:    tenant/{tenantId}/app/{applicationId}/device/{mqtt_username}/cmd
+ACK:        tenant/{tenantId}/app/{applicationId}/device/{mqtt_username}/ack
 ```
 
 ### Payloads
@@ -110,7 +114,7 @@ Status:     tenant/{tenantId}/app/{applicationId}/device/{mqtt_username}/status
 **Birth message** (QoS 1, retained — published on connect):
 
 ```json
-{ "state": "online" }
+{ "state": "online", "firmwareVersion": "1.0.0" }
 ```
 
 **Last Will & Testament** (QoS 1, retained — sent by broker on disconnect):
@@ -122,8 +126,55 @@ Status:     tenant/{tenantId}/app/{applicationId}/device/{mqtt_username}/status
 ### Connection Settings
 
 - Keep-alive: 60s
-- Buffer size: 512 bytes
+- Buffer size: 1024 bytes
 - Reconnect: exponential backoff 5s → 60s max
+
+## Remote OTA Updates
+
+The device supports remote firmware updates triggered from the Sensorclouds platform via MQTT.
+
+### Update Flow
+
+```
+Platform publishes ota:update to /cmd
+  → Device ACKs: downloading (0%, 25%, 50%, 75%)
+  → Downloads firmware over HTTPS
+  → Verifies SHA-256 checksum
+  → ACKs: installing (100%)
+  → Writes to inactive OTA partition
+  → Saves state to NVS
+  → Reboots
+
+Device boots with new firmware
+  → Connects WiFi → MQTT
+  → Birth message with new firmwareVersion
+  → Sends final ACK: ok
+```
+
+### Rollback
+
+The platform can send an `ota:rollback` command to switch back to the previous firmware partition and reboot.
+
+### Partition Table
+
+Uses `min_spiffs.csv` (dual OTA slots):
+
+| Partition | Size    |
+| --------- | ------- |
+| app0      | ~1.9 MB |
+| app1      | ~1.9 MB |
+| NVS       | 20 KB   |
+| SPIFFS    | 192 KB  |
+
+### Firmware Version
+
+Set via build flag in `platformio.ini`:
+
+```ini
+build_flags = -D FIRMWARE_VERSION='"1.0.0"'
+```
+
+Bump this on each release. The platform compares this value to determine update status.
 
 ## Testing
 

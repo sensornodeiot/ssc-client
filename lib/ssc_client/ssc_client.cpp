@@ -1,4 +1,5 @@
 #include "ssc_client.h"
+#include "config.h"
 #include <Arduino.h>
 
 SSCClient::SSCClient(Client& networkClient)
@@ -13,7 +14,11 @@ void SSCClient::begin(const SSCConfig& config) {
 
     mqtt_.setServer(config_.host, config_.port);
     mqtt_.setKeepAlive(KEEP_ALIVE_SEC);
-    mqtt_.setBufferSize(512);
+    mqtt_.setBufferSize(1024);
+
+    if (commandCallback_) {
+        mqtt_.setCallback(commandCallback_);
+    }
 
     snprintf(lwtPayload_, sizeof(lwtPayload_),
              "{\"state\":\"offline\",\"reason\":\"lwt\"}");
@@ -21,6 +26,23 @@ void SSCClient::begin(const SSCConfig& config) {
     Serial.printf("[SSC] Broker: %s:%u\n", config_.host, config_.port);
     Serial.printf("[SSC] Telemetry: %s\n", telemetryTopic_);
     Serial.printf("[SSC] Status: %s\n", statusTopic_);
+    Serial.printf("[SSC] Cmd: %s\n", cmdTopic_);
+    Serial.printf("[SSC] Ack: %s\n", ackTopic_);
+}
+
+void SSCClient::setCommandCallback(CommandCallback cb) {
+    commandCallback_ = cb;
+}
+
+bool SSCClient::publishAck(const char* payload) {
+    if (state_ != SSCState::Connected) return false;
+    bool ok = mqtt_.publish(ackTopic_, payload, false);
+    if (ok) {
+        Serial.printf("[SSC] ACK sent to %s\n", ackTopic_);
+    } else {
+        Serial.println("[SSC] ACK publish failed");
+    }
+    return ok;
 }
 
 void SSCClient::update() {
@@ -60,6 +82,14 @@ void SSCClient::buildTopics() {
     snprintf(statusTopic_, sizeof(statusTopic_),
              "tenant/%s/app/%s/device/%s/status",
              config_.tenantId, config_.applicationId, config_.username);
+
+    snprintf(cmdTopic_, sizeof(cmdTopic_),
+             "tenant/%s/app/%s/device/%s/cmd",
+             config_.tenantId, config_.applicationId, config_.username);
+
+    snprintf(ackTopic_, sizeof(ackTopic_),
+             "tenant/%s/app/%s/device/%s/ack",
+             config_.tenantId, config_.applicationId, config_.username);
 }
 
 void SSCClient::startConnect() {
@@ -82,6 +112,8 @@ void SSCClient::startConnect() {
         state_ = SSCState::Connected;
         backoffMs_ = MIN_BACKOFF_MS;
         publishBirthMessage();
+        mqtt_.subscribe(cmdTopic_);
+        Serial.printf("[SSC] Subscribed: %s\n", cmdTopic_);
     }
 }
 
@@ -91,6 +123,8 @@ void SSCClient::checkConnection() {
         state_ = SSCState::Connected;
         backoffMs_ = MIN_BACKOFF_MS;
         publishBirthMessage();
+        mqtt_.subscribe(cmdTopic_);
+        Serial.printf("[SSC] Subscribed: %s\n", cmdTopic_);
         return;
     }
 
@@ -112,7 +146,10 @@ void SSCClient::scheduleRetry() {
 }
 
 bool SSCClient::publishBirthMessage() {
-    const char* payload = "{\"state\":\"online\"}";
+    char payload[128];
+    snprintf(payload, sizeof(payload),
+             "{\"state\":\"online\",\"firmwareVersion\":\"%s\"}",
+             FIRMWARE_VERSION);
     bool ok = mqtt_.publish(statusTopic_, payload, true);
     if (ok) {
         Serial.println("[SSC] Birth message sent");

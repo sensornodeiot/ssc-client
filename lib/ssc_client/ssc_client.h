@@ -20,6 +20,8 @@ struct SSCConfig {
     const char* applicationId;
 };
 
+using CommandCallback = void (*)(const char* topic, uint8_t* payload, unsigned int length);
+
 class SSCClient {
 public:
     explicit SSCClient(Client& networkClient);
@@ -29,8 +31,13 @@ public:
     void disconnect();
 
     bool publishTelemetry(float temperature, float humidity);
+    bool publishAck(const char* payload);
+    void setCommandCallback(CommandCallback cb);
+
     bool isConnected() const { return state_ == SSCState::Connected; }
     SSCState state() const { return state_; }
+    PubSubClient& getMqttClient() { return mqtt_; }
+    const char* getAckTopic() const { return ackTopic_; }
 
 private:
     void buildTopics();
@@ -41,9 +48,12 @@ private:
 
     PubSubClient mqtt_;
     SSCConfig config_{};
+    CommandCallback commandCallback_ = nullptr;
 
     char telemetryTopic_[160];
     char statusTopic_[160];
+    char cmdTopic_[160];
+    char ackTopic_[160];
     char lwtPayload_[64];
 
     SSCState state_ = SSCState::Disconnected;

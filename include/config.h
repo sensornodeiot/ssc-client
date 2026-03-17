@@ -6,3 +6,8 @@
 
 // Boot button to trigger config portal
 #define OTA_TRIGGER_PIN 0 // GPIO0 = BOOT button
+
+// Firmware version fallback (overridden by build flag)
+#ifndef FIRMWARE_VERSION
+#define FIRMWARE_VERSION "0.0.0-dev"
+#endif
