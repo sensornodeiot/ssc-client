@@ -1,6 +1,6 @@
 # ESP32 Sensor Node for Sensorclouds
 
-ESP32-based IoT sensor node client for the [Sensorclouds](https://sensornodeiot.com) MQTT platform. Features a web config portal, WiFi management with auto-reconnect, MQTT telemetry publishing, OTA firmware updates, and NVS-based persistent configuration.
+ESP32-based IoT sensor node client for the [Sensorclouds](https://ssc.sensornodeiot.com) MQTT platform. Features a web config portal, WiFi management with auto-reconnect, MQTT telemetry publishing, OTA firmware updates, and NVS-based persistent configuration.
 
 ## Project Structure
 
@@ -42,9 +42,9 @@ pio run --target upload --target monitor      # Flash and monitor
 
 ### External Dependencies
 
-| Library | Version | Purpose |
-|---------|---------|---------|
-| [PubSubClient](https://github.com/knolleary/pubsubclient) | ^2.8 | MQTT 3.1.1 client |
+| Library                                                   | Version | Purpose           |
+| --------------------------------------------------------- | ------- | ----------------- |
+| [PubSubClient](https://github.com/knolleary/pubsubclient) | ^2.8    | MQTT 3.1.1 client |
 
 All other libraries (WiFi, Preferences, WebServer, Update) are built into the ESP32 Arduino core.
 
@@ -62,12 +62,12 @@ Power on
 
 ### Config Portal
 
-| Setting | Value |
-|---------|-------|
-| AP SSID | `SSN32-Config` |
-| AP Password | `ssn32config` |
-| Portal URL | `http://192.168.4.1` |
-| Trigger | Hold BOOT button (GPIO0) for 2 seconds at startup |
+| Setting     | Value                                             |
+| ----------- | ------------------------------------------------- |
+| AP SSID     | `SSN32-Config`                                    |
+| AP Password | `ssn32config`                                     |
+| Portal URL  | `http://192.168.4.1`                              |
+| Trigger     | Hold BOOT button (GPIO0) for 2 seconds at startup |
 
 The portal is a single-page web app with four steps: **Status** → **WiFi** → **MQTT** → **OTA**.
 
@@ -102,18 +102,21 @@ Status:     tenant/{tenantId}/app/{applicationId}/device/{mqtt_username}/status
 ### Payloads
 
 **Telemetry** (QoS 0):
+
 ```json
-{"temperature": 25.50, "humidity": 60.25}
+{ "temperature": 25.5, "humidity": 60.25 }
 ```
 
 **Birth message** (QoS 1, retained — published on connect):
+
 ```json
-{"state": "online"}
+{ "state": "online" }
 ```
 
 **Last Will & Testament** (QoS 1, retained — sent by broker on disconnect):
+
 ```json
-{"state": "offline", "reason": "lwt"}
+{ "state": "offline", "reason": "lwt" }
 ```
 
 ### Connection Settings
@@ -132,12 +135,12 @@ pio test -e native        # Host-only tests
 pio test -e esp32dev      # On-device tests (requires connected board)
 ```
 
-| Suite | Environment | Tests |
-|-------|-------------|-------|
-| `test_config` | native | Config struct validation: `clear()`, `hasWiFi()`, `hasMqtt()`, `isValid()` |
-| `test_config_store` | esp32dev | NVS save/load roundtrips, empty config, custom intervals |
-| `test_config_store_save` | native | NVS save edge cases with mocked Preferences, failure injection |
-| `test_ssc_client` | native | MQTT topic format, telemetry/birth/LWT payload construction |
+| Suite                    | Environment | Tests                                                                      |
+| ------------------------ | ----------- | -------------------------------------------------------------------------- |
+| `test_config`            | native      | Config struct validation: `clear()`, `hasWiFi()`, `hasMqtt()`, `isValid()` |
+| `test_config_store`      | esp32dev    | NVS save/load roundtrips, empty config, custom intervals                   |
+| `test_config_store_save` | native      | NVS save edge cases with mocked Preferences, failure injection             |
+| `test_ssc_client`        | native      | MQTT topic format, telemetry/birth/LWT payload construction                |
 
 ## Extending the Project
 
