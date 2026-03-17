@@ -528,12 +528,6 @@ function updateStatusPage() {
   badge.textContent = doneCount + ' of 3';
   badge.className = 'badge ' + (isValid ? 'badge-green' : 'badge-orange');
 
-  // Update header
-  const dot = document.getElementById('status-dot');
-  const label = document.getElementById('status-label');
-  dot.className = isValid ? 'dot online' : 'dot';
-  label.textContent = isValid ? 'ESP32 · Ready' : 'ESP32 · Setup required';
-
   // Update hero
   const hero = document.getElementById('hero-banner');
   const heroBtn = document.getElementById('hero-btn');
