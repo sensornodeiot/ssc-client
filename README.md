@@ -1,6 +1,6 @@
-# ESP32 Sensor Node for Sensorclouds
+# End-node guide connecting to Sensorclouds
 
-ESP32-based IoT sensor node client for the [Sensorclouds](https://ssc.sensornodeiot.com) MQTT platform. Features a web config portal, WiFi management with auto-reconnect, MQTT telemetry publishing, OTA firmware updates, and NVS-based persistent configuration.
+Sensorclouds-client bundle library for connecting end-node to the [Sensorclouds](https://ssc.sensornodeiot.com) IoT platform. Features a web config portal, WiFi management with auto reconnect, MQTT telemetry publishing, OTA firmware updates, and NVS-based persistent configuration.
 
 ## Project Structure
 
