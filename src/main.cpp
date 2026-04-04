@@ -44,9 +44,8 @@ void setup()
     Serial.printf("[Main] Firmware version: %s\n", FIRMWARE_VERSION);
 
     // Set MQTT command callback to route to OtaHandler
-    sscClient.setCommandCallback([](const char* topic, uint8_t* payload, unsigned int len) {
-        otaHandler.handleMessage(topic, payload, len);
-    });
+    sscClient.setCommandCallback([](const char *topic, uint8_t *payload, unsigned int len)
+                                 { otaHandler.handleMessage(topic, payload, len); });
 
     // Start WiFi
     wifiMgr.begin(config.wifi_ssid, config.wifi_pass);
@@ -85,6 +84,8 @@ void loop()
         // Drive OTA state machine
         otaHandler.update();
     }
+
+    Serial.println("Hi OTA");
 
     delay(1000);
 }
