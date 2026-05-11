@@ -19,7 +19,7 @@ pio test -e esp32dev                          # On-device tests (requires board)
 pio test -e native -f test_ssc_client         # Run a single suite
 ```
 
-The `native` env sets `build_src_filter = -<*>` and `lib_ignore = config_store` so it links only against pure-C++ code, not Arduino/ESP-IDF. When adding new test suites that touch hardware APIs, list them under `test_ignore` in the `[env:native]` section.
+Native-runnable suites (no board required): `test_config`, `test_config_store_save`, `test_ssc_client`. Hardware-only suites (`test_config_store`, `test_sensor`) are listed under `test_ignore` in `[env:native]`. When adding new test suites that touch hardware APIs, add them there too.
 
 ## Repository Intent
 
@@ -38,7 +38,7 @@ This codebase is a **library/template for downstream developers** to connect the
 - `ssc_client` — Wraps `PubSubClient`; owns MQTT topic construction (`tenant/{tenantId}/app/{applicationId}/device/{mqtt_username}/{data|status|cmd|ack}`), birth/LWT, reconnect
 - `ota_handler` — Receives `ota:*` commands, runs state machine (download → SHA-256 verify → write to inactive OTA partition → reboot), persists progress to NVS so it can ACK after reboot
 - `config_cmd_handler` — Receives `config:*` commands. Currently handles `config:set_interval` (bounds: `MIN_INTERVAL_MS`..`MAX_INTERVAL_MS` in the header), persists via `ConfigStore::save()`, ACKs back. Designed to grow more `config:*` subcommands via its internal switch.
-- `sensor` — Abstract `Sensor` base class; downstream user subclasses it and passes the pointer to `SSCApp::setSensor()`
+- `sensor` — Abstract `Sensor` base class; downstream user subclasses it and passes the pointer to `SSCApp::setSensor()`. Required overrides: `bool begin()` and `SensorReading read()`. `SensorReading` has three fields: `float temperature`, `float humidity`, `bool valid`. Adding new fields requires changing both `SensorReading` and `SSCClient::publishTelemetry`.
 
 **Command routing** — `SSCClient` exposes a single MQTT command callback (C-style `void(*)(...)`, no captures). `SSCApp` registers a **static** member function and uses `SSCApp::instance_` (set in `begin()`) to forward into a non-static `dispatchCommand()`. The dispatcher parses JSON once and routes by `command` prefix: `ota:*` → `OtaHandler`, `config:*` → `ConfigCmdHandler`. **Do not add ad-hoc MQTT subscriptions elsewhere.** New command families should add a new handler library and another `else if` branch in `SSCApp::dispatchCommand()`.
 
