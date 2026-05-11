@@ -30,7 +30,7 @@ public:
     void update();
     void disconnect();
 
-    bool publishTelemetry(float temperature, float humidity);
+    bool publishTelemetry(const char* hexPayload);
     bool publishAck(const char* payload);
     void setCommandCallback(CommandCallback cb);
 
