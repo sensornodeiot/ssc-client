@@ -30,3 +30,4 @@ credentials.h
 secrets.h
 
 docs
+include/credential.txt
