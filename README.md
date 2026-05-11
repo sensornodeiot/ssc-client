@@ -6,14 +6,16 @@ Sensorclouds-client bundle library for connecting end-nodes to the [Sensorclouds
 
 ```
 esp32/
-├── src/main.cpp                  # Entry point: setup() and loop()
+├── src/main.cpp                  # Thin entry: instantiate SSCApp + your Sensor
 ├── include/config.h              # AP credentials, boot button pin
 ├── lib/
+│   ├── ssc_app/                  # Top-level orchestrator (use this from main.cpp)
 │   ├── config_store/             # NVS-based persistent configuration
 │   ├── config_portal/            # Captive portal web UI (4-step wizard)
 │   ├── ssc_client/               # MQTT client for Sensorclouds platform
 │   ├── wifi_manager/             # Non-blocking WiFi state machine
 │   ├── ota_handler/              # Remote OTA update lifecycle
+│   ├── config_cmd_handler/       # Remote config commands (e.g. set_interval)
 │   └── sensor/                   # Abstract sensor interface
 ├── test/
 │   ├── test_config/              # Config struct validation (native)
@@ -193,11 +195,36 @@ pio test -e esp32dev      # On-device tests (requires connected board)
 | `test_config_store_save` | native      | NVS save edge cases with mocked Preferences, failure injection             |
 | `test_ssc_client`        | native      | MQTT topic format, telemetry/birth/LWT payload construction                |
 
-## Extending the Project
+## Using This as a Library
+
+The bundled `lib/ssc_app/SSCApp` class owns all orchestration — WiFi, MQTT, OTA, remote config commands, and the periodic telemetry scheduler. To bring a new device online you only need to:
+
+1. Subclass `Sensor` (`lib/sensor/sensor.h`) for your hardware
+2. Wire it into `SSCApp` in `src/main.cpp`
+
+### Minimal `main.cpp`
+
+```cpp
+#include <Arduino.h>
+#include "ssc_app.h"
+#include "my_sensor.h"   // your Sensor subclass
+
+SSCApp app;
+MySensor sensor;
+
+void setup() {
+    Serial.begin(115200);
+    app.setSensor(&sensor);   // optional — omit for connectivity-only devices
+    app.begin();
+}
+
+void loop() {
+    app.update();
+    delay(10);
+}
+```
 
 ### Adding a Sensor
-
-Subclass `Sensor` from `lib/sensor/sensor.h`:
 
 ```cpp
 #include "sensor.h"
@@ -219,4 +246,29 @@ public:
 };
 ```
 
-Then instantiate it in `src/main.cpp` and pass readings to `sscClient.publishTelemetry(temp, humidity)`.
+`SSCApp` calls `sensor->read()` every `config.publish_interval_ms` and publishes the reading when `valid == true`. If `setSensor()` is never called, the device still connects, handles OTA, and accepts remote config commands — it just doesn't publish telemetry.
+
+## Remote Config Commands
+
+The platform can change device behavior at runtime via MQTT commands on `/cmd`. Changes are persisted to NVS and survive reboot.
+
+### `config:set_interval`
+
+Updates how often telemetry is published.
+
+**Send from the SSC platform (Send Command dialog):**
+
+| Field | Value |
+| ----- | ----- |
+| Command | `config:set_interval` |
+| Parameters | `{ "publish_interval_ms": 30000 }` |
+
+**Bounds:** 1000 ms – 3600000 ms (1 second to 1 hour). Out-of-range values are rejected with a `failed` ACK.
+
+**ACK on success:**
+
+```json
+{ "commandId": "...", "command": "config:set_interval", "status": "ok" }
+```
+
+The new interval takes effect on the next loop tick — no reboot needed.
