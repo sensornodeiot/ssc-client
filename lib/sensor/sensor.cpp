@@ -38,8 +38,12 @@ bool sensorBegin() {
 
 static SensorReading doRead() {
     SensorReading r;
-    // r.add("temperature", 0.0f);
-    // r.valid = true;
+    // Mock: temperature 20.0–35.0 °C, humidity 40.0–80.0 %
+    float temp  = 20.0f + (esp_random() % 1500) / 100.0f;
+    float humid = 40.0f + (esp_random() % 4000) / 100.0f;
+    r.add("temperature", temp);
+    r.add("humidity", humid);
+    r.valid = true;
     return r;
 }
 

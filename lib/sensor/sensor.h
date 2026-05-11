@@ -3,9 +3,9 @@
 #include <stdint.h>
 #include <string.h>
 
-#define SENSOR_MAX_PARAMS  8
+#define SENSOR_MAX_PARAMS     16
 #define SENSOR_PARAM_NAME_LEN 16
-#define SENSOR_HEX_BUF_LEN   73   // 4 (nonce) + 8*8 (params) + 1 (null)
+#define SENSOR_HEX_BUF_LEN   133  // 4 (nonce) + 16*8 (params) + 1 (null)
 
 struct SensorParam {
     char  name[SENSOR_PARAM_NAME_LEN];
