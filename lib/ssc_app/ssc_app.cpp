@@ -14,9 +14,6 @@ void SSCApp::begin() {
     configStore_.begin();
     configStore_.load(config_);
 
-    // Enter config portal if:
-    // 1. BOOT button held during reset, OR
-    // 2. No valid configuration
     if (shouldEnterPortal(OTA_TRIGGER_PIN)) {
         Serial.println("[App] Config portal triggered by button");
         startConfigPortal(configStore_, OTA_AP_SSID, OTA_AP_PASSWORD);
@@ -46,7 +43,7 @@ void SSCApp::begin() {
     otaHandler_.begin(&sscClient_.getMqttClient(), sscClient_.getAckTopic(), &configStore_);
     cfgCmdHandler_.begin(&configStore_, &config_, &sscClient_);
 
-    if (userSensor_) userSensor_->begin();
+    sensorBegin();
 }
 
 void SSCApp::update() {
@@ -55,19 +52,18 @@ void SSCApp::update() {
 
     sscClient_.update();
 
-    // After first MQTT connect, check for pending OTA ACK
     if (sscClient_.isConnected() && !otaAckChecked_) {
         otaHandler_.checkPendingAck();
         otaAckChecked_ = true;
     }
     otaHandler_.update();
 
-    // Periodic telemetry — only when a sensor is wired and MQTT is connected
-    if (sscClient_.isConnected() && userSensor_ &&
+    // Periodic telemetry
+    if (sscClient_.isConnected() &&
         (millis() - lastPublishMs_ >= config_.publish_interval_ms)) {
-        SensorReading r = userSensor_->read();
-        if (r.valid) {
-            sscClient_.publishTelemetry(r.temperature, r.humidity);
+        char hex[SENSOR_HEX_BUF_LEN];
+        if (sensorRead(hex, sizeof(hex))) {
+            sscClient_.publishTelemetry(hex);
         }
         lastPublishMs_ = millis();
     }

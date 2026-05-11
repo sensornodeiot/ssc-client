@@ -14,13 +14,8 @@ class SSCApp {
 public:
     SSCApp() : sscClient_(wifiClient_) {}
 
-    // Optional. Wire a sensor to enable periodic telemetry.
-    // If unset, the device still connects, handles OTA, and accepts
-    // remote config commands; it just doesn't publish telemetry.
-    void setSensor(Sensor* sensor) { userSensor_ = sensor; }
-
     // Loads NVS config, may launch portal, brings WiFi + MQTT up,
-    // initializes OTA and config-command handlers.
+    // initializes OTA and config-command handlers, and calls sensorBegin().
     void begin();
 
     // Drive the state machines and the telemetry scheduler.
@@ -41,7 +36,6 @@ private:
     OtaHandler otaHandler_;
     ConfigCmdHandler cfgCmdHandler_;
 
-    Sensor* userSensor_ = nullptr;
     bool otaAckChecked_ = false;
     uint32_t lastPublishMs_ = 0;
 };

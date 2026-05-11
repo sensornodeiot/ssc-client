@@ -159,19 +159,12 @@ bool SSCClient::publishBirthMessage() {
     return ok;
 }
 
-bool SSCClient::publishTelemetry(float temperature, float humidity) {
-    if (state_ != SSCState::Connected) {
-        return false;
-    }
+bool SSCClient::publishTelemetry(const char* hexPayload) {
+    if (state_ != SSCState::Connected) return false;
 
-    char payload[128];
-    snprintf(payload, sizeof(payload),
-             "{\"temperature\":%.2f,\"humidity\":%.2f}",
-             temperature, humidity);
-
-    bool ok = mqtt_.publish(telemetryTopic_, payload);
+    bool ok = mqtt_.publish(telemetryTopic_, hexPayload);
     if (ok) {
-        Serial.printf("[SSC] Telemetry: %s\n", payload);
+        Serial.printf("[SSC] Telemetry: %s\n", hexPayload);
     } else {
         Serial.println("[SSC] Telemetry publish failed");
     }
