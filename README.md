@@ -109,9 +109,13 @@ ACK:        tenant/{tenantId}/app/{applicationId}/device/{mqtt_username}/ack
 
 **Telemetry** (QoS 0):
 
-```json
-{ "temperature": 25.5, "humidity": 60.25 }
+Raw hex string — 4-char random nonce followed by one 8-char IEEE 754 float per parameter:
+
 ```
+a3f241cc000042708ccd
+```
+
+Example decoded: nonce `a3f2`, temperature `41cc0000` (25.5 °C), humidity `42708ccd` (60.08 %).
 
 **Birth message** (QoS 1, retained — published on connect):
 
@@ -207,14 +211,11 @@ The bundled `lib/ssc_app/SSCApp` class owns all orchestration — WiFi, MQTT, OT
 ```cpp
 #include <Arduino.h>
 #include "ssc_app.h"
-#include "my_sensor.h"   // your Sensor subclass
 
 SSCApp app;
-MySensor sensor;
 
 void setup() {
     Serial.begin(115200);
-    app.setSensor(&sensor);   // optional — omit for connectivity-only devices
     app.begin();
 }
 
@@ -226,27 +227,25 @@ void loop() {
 
 ### Adding a Sensor
 
+Edit `lib/sensor/sensor.cpp` — only the two marked functions:
+
 ```cpp
-#include "sensor.h"
+bool sensorBegin() {
+    // Initialize your hardware here (e.g. Serial2.begin, Wire.begin)
+    return true;
+}
 
-class DHTSensor : public Sensor {
-public:
-    bool begin() override {
-        // Initialize hardware
-        return true;
-    }
-
-    SensorReading read() override {
-        SensorReading r;
-        r.temperature = /* read from hardware */;
-        r.humidity    = /* read from hardware */;
-        r.valid       = true;
-        return r;
-    }
-};
+static SensorReading doRead() {
+    SensorReading r;
+    // Read from hardware, then:
+    r.add("temperature", /* float value */);
+    r.add("humidity",    /* float value */);
+    r.valid = true;
+    return r;
+}
 ```
 
-`SSCApp` calls `sensor->read()` every `config.publish_interval_ms` and publishes the reading when `valid == true`. If `setSensor()` is never called, the device still connects, handles OTA, and accepts remote config commands — it just doesn't publish telemetry.
+`SSCApp` calls `sensorRead()` every `config.publish_interval_ms` and publishes the hex-encoded reading when `valid == true`. Up to 16 named parameters are supported. Do not modify the hex-encoding section below the marked line in `sensor.cpp`.
 
 ## Remote Config Commands
 
