@@ -362,7 +362,7 @@ const char PORTAL_HTML[] PROGMEM = R"rawliteral(
         <div class="grid">
           <div class="form-group">
             <label class="label">MQTT Host <span class="req">*</span></label>
-            <input type="text" id="mqtt-host" placeholder="mqtt.sensornodeiot.com" maxlength="64">
+            <input type="text" id="mqtt-host" placeholder="mqtt.sensorclouds.app" maxlength="64">
             <div class="field-error" id="err-mqtt-host">MQTT Host is required</div>
           </div>
           <div class="form-group">
